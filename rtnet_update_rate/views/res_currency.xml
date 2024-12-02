@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_currency_form_inherit_views_ve" model="ir.ui.view">
+        <field name="name">view_currency_form_inherit_views_ve</field>
+        <field name="model">res.currency</field>
+        <field name="inherit_id" ref="base.view_currency_form"/>
+        <field name="arch" type="xml">
+             <xpath expr="//field[@name='currency_subunit_label']" position="after">
+                 <field name="sync_rate" string="Actualizar Tasa"/>
+                 <button name="update_rate" string="Actualizar Ahora" class="oe_highlight" type="object"  invisible="not sync_rate"/>
+            </xpath>
+        </field>
+    </record>
+
+
+</odoo>

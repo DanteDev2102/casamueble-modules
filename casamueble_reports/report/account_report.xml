@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="0">
+        <template id="report_invoicesales">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="web.basic_layout">
+                        <div class="page">
+                            <!-- <span t-field="o.invoice_date"/> -->
+                            <t t-set="dia" t-value="o.invoice_date.strftime('%d')"/>
+                            <t t-set="mes" t-value="o.invoice_date.strftime('%m')"/>
+                            <t t-set="ano" t-value="o.invoice_date.strftime('%Y')"/>
+                            <table class="table" style="width: 20%; float: right;">
+                                <thead>
+                                    <tr style="background-color: #abc9cd; color: white;">
+                                        <th class="col">City</th>
+                                        <th class="col">Day</th>
+                                        <th class="col">Month</th>
+                                        <th class="col">Year</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="text-center">Barquisimeto</td>
+                                        <td class="text-center"><span t-out="dia"/></td>
+                                        <td class="text-center"><span t-out="mes"/></td>
+                                        <td class="text-center"><span t-out="ano"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <br/>
+                            <table class="table mb-0" style="border: 1px solid #000;">
+                                <tbody>
+                                    <tr>
+                                        <td style="width:30%">Name and lastname</td>
+                                        <td><span t-field="o.partner_id.name"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width:30%">Adress</td>
+                                        <td><span t-field="o.partner_id.street"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <table class="table table-sm mb-0 mt-0" >
+                                <thead>
+                                    <tr style="background-color: #abc9cd; color: white;">
+                                        <th >R.I.F. / C.I.</th>
+                                        <th>Phone</th>
+                                        <th>NP</th>
+                                        <th>Method of payment</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span t-field="o.partner_id.vat"/></td>
+                                        <td><span t-field="o.partner_id.phone"/></td>
+                                        <t t-if="o.invoice_payments_widget">
+                                            <td></td>
+                                            <td class="text-center"><span t-out="o.invoice_payments_widget['content'][0]['journal_name']"/></td>
+                                        </t>
+                                        <t t-else="">
+                                            <td></td>
+                                            <td></td>
+                                        </t>                
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <table class="table table-sm mb-0 mt-0" style="border: 1px solid #000;">
+                                <thead>
+                                    <tr style="background-color: #abc9cd; color: white;">
+                                        <th style="width:5%">Qty.</th>
+                                        <th >Product</th>
+                                        <th style="width:5%">Unit Price</th>
+                                        <th style="width:5%">Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="o.invoice_line_ids" t-as="p">
+                                        <tr style="border: none;">
+                                            <td class="text-center" style="width:5%"><span t-field="p.quantity"/></td>
+                                            <td style="width:40%"><span t-field="p.product_id.name"/></td>
+                                            <td class="text-end" style="width:20%"><span t-field="p.price_unit"/></td>
+                                            <td class="text-end" style="width:20%"><span t-esc="p.price_subtotal"/></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                            <table class="table table-sm mb-0 mt-0" style="border: 1px solid #000;">
+                                <tbody>
+                                    <tr>
+                                        <td rowspan="2" style="width:54.55%">
+                                            <strong>
+                                                <span t-esc="o.narration"/>
+                                            </strong>
+                                        </td>
+                                        <td class="text-end" style="width: 22%">
+                                            <strong>SUB-TOTAL</strong>
+                                        </td>
+                                        <td class="text-end" style="width: 23.43%">
+                                            <strong>
+                                                <span t-esc="float(o.amount_total)"/>
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-end">
+                                            <strong>Payment</strong>
+                                        </td>
+                                        <td class="text-end" >
+                                            <t t-set="pending_amount" t-value="round(float(o.amount_total - o.amount_residual),2)"/>
+                                            <strong>
+                                                <span t-out="pending_amount"/>
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <strong>
+                                                Compliant signature
+                                            </strong>
+                                        </td>
+                                        <td class="text-end" style="background-color: #9cb8bb;">
+                                            <strong>Total owed</strong>
+                                        </td>
+                                        <td class="text-end" >
+                                            <strong>
+                                                <span t-esc="float(o.amount_residual)"/>
+                                            </strong>    
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p>
+                                <br/>
+                                <strong>Our systems</strong>
+                                <br/>
+                                <strong>1.</strong>Reserved (45 continuous days)
+                                <br/>
+                                <strong>2.</strong>Manufacturing (delivery within 20 business days)
+                                <br/>
+                                <strong>3.</strong>Purchase of content (immediate delivery)
+                                <br/>
+                                <strong>NO MONEY REFUNDS ARE MADE, WITHOUT EXCEPTION</strong>
+                            </p>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+        
+
+    </data>
+</odoo>

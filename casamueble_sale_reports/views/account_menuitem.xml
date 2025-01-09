@@ -1,0 +1,8 @@
+<odoo>
+    <menuitem
+        id="menuitem"
+        name="Generate Excel Document"
+        action="account.action_account_invoice_report_all"
+        parent="account.menu_finance_reports"
+        sequence="10"/>
+</odoo>

@@ -1,0 +1,38 @@
+<odoo>
+	<record id="wizard" model="ir.ui.view">
+		<field name="name">account_generate_xlsx_wizard</field>
+		<field name="model">generate_xlsx</field>
+		<field name="arch" type="xml">
+			<form>
+				<div>
+					<label for="date_from" string="Date From:"/>
+					<field name="date_from"/>
+				</div>
+				<br/>
+				<div>
+					<label for="date_to" string="Date To:"/>
+					<field name="date_to"/>
+				</div>
+				<footer>
+					<button name="get_payments" string=":)" type="object" class="btn-primary" />
+					<button string="Cancel" type="object" class="btn-default" special="cancel"/>
+				</footer>
+			</form>
+		</field>
+	</record>
+
+	<record id="generate_action" model="ir.actions.act_window">
+		<field name="name">Generate Xlsx Document</field>
+		<field name="res_model">generate_xlsx</field>
+		<field name="view_mode">form</field>
+		<field name="view_id" ref="casamueble_sale_reports.wizard"/>
+		<field name="target">new</field>
+	</record>
+
+    <menuitem
+        id="menuitem"
+        name="Generate Xlsx Document"
+        action="casamueble_sale_reports.generate_action"
+        parent="account.menu_finance_reports"
+        sequence="10"/>
+</odoo>

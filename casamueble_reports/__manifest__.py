@@ -1,0 +1,15 @@
+{
+    "name": "Sale Report",
+    "version": "17.0.1.0.0",
+    "description": "",
+    "summary": "",
+    "author": "",
+    "website": "",
+    "license": "LGPL-3",
+    "category": "",
+    "depends": ["base", "sale_management", "account_accountant"],
+    "data": ["report/report_views.xml", "report/account_report.xml"],
+    "auto_install": False,
+    "application": False,
+    "assets": {},
+}

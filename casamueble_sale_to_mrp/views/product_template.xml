@@ -11,6 +11,10 @@
                     <field name="fabric_ok" string="Tela"/>
                     <label for="fabric_ok"/>
                 </span>
+                <span class="d-inline-block">
+                    <field name="legs_ok" string="Patas"/>
+                    <label for="legs_ok"/>
+                </span>
             </div>
         </field>
     </record>

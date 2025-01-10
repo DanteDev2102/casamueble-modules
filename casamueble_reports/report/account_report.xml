@@ -5,8 +5,7 @@
             <t t-call="web.html_container">
                 <t t-foreach="docs" t-as="o">
                     <t t-call="web.basic_layout">
-                        <div class="page">
-                            <!-- <span t-field="o.invoice_date"/> -->
+                        <div class="page" style="position: relative; top: 30px;">
                             <t t-set="dia" t-value="o.invoice_date.strftime('%d')"/>
                             <t t-set="mes" t-value="o.invoice_date.strftime('%m')"/>
                             <t t-set="ano" t-value="o.invoice_date.strftime('%Y')"/>
@@ -46,7 +45,7 @@
                                     <tr style="background-color: #abc9cd; color: white;">
                                         <th >R.I.F. / C.I.</th>
                                         <th>Phone</th>
-                                        <th>NP</th>
+                                        <th>Nro Nota</th>
                                         <th>Method of payment</th>
                                     </tr>
                                 </thead>
@@ -54,8 +53,8 @@
                                     <tr>
                                         <td><span t-field="o.partner_id.vat"/></td>
                                         <td><span t-field="o.partner_id.phone"/></td>
+                                        <td><span t-field="o.name"/></td>
                                         <t t-if="o.invoice_payments_widget">
-                                            <td></td>
                                             <td class="text-center"><span t-out="o.invoice_payments_widget['content'][0]['journal_name']"/></td>
                                         </t>
                                         <t t-else="">

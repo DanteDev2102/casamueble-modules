@@ -75,12 +75,12 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <t t-foreach="o.invoice_line_ids" t-as="p">
+                                    <t t-foreach="o.invoice_line_ids" t-as="line">
                                         <tr style="border: none;">
-                                            <td class="text-center" style="width:5%"><span t-field="p.quantity"/></td>
-                                            <td style="width:40%"><span t-field="p.product_id.name"/></td>
-                                            <td class="text-end" style="width:20%"><span t-field="p.price_unit"/></td>
-                                            <td class="text-end" style="width:20%"><span t-esc="p.price_subtotal"/></td>
+                                            <td class="text-center" style="width:5%; border: none;"><span t-out="line.quantity if line.quantity > 0 else ''"/></td>
+                                            <td style="width:40%; border: none;"><span t-field="line.name"/></td>
+                                            <td class="text-end" style="width:20%; border: none;"><span t-out="line.price_unit if line.quantity > 0 else ''"/></td>
+                                            <td class="text-end" style="width:20%; border: none;"><span t-out="line.price_subtotal if line.quantity > 0 else ''"/></td>
                                         </tr>
                                     </t>
                                 </tbody>

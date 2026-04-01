@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- ================================================================
+             REPORTE: INGRESOS Y EGRESOS — CASAMUEBLE
+             Basado en pagos registrados (account.payment)
+             Ingresos  = pagos recibidos  (payment_type = inbound)
+             Egresos   = pagos realizados (payment_type = outbound)
+             Filtros:  rango de fechas, comparación, crecimiento,
+                       diario, contacto, asientos sin conciliar
+        ================================================================ -->
+
+        <record id="casamueble_cash_flow_report" model="account.report">
+            <field name="name">Ingresos y Egresos</field>
+            <field name="filter_date_range" eval="True"/>
+            <field name="filter_journals" eval="True"/>
+            <field name="filter_partner" eval="True"/>
+            <!-- <field name="filter_comparison" eval="True"/> -->
+            <field name="filter_unreconciled" eval="True"/>
+        </record>
+
+        <!-- ================================================================
+             COLUMNAS
+        ================================================================ -->
+
+        <record id="col_ingresos_egresos_balance" model="account.report.column">
+            <field name="report_id" ref="casamueble_cash_flow_report"/>
+            <field name="name">Saldo</field>
+            <field name="expression_label">balance</field>
+            <field name="figure_type">monetary</field>
+            <field name="sequence">1</field>
+        </record>
+
+        <!-- ================================================================
+             LÍNEA 1 — INGRESOS TOTALES (AGREGACIÓN)
+        ================================================================ -->
+        <record id="line_cm_ingresos" model="account.report.line">
+            <field name="name">Ingresos</field>
+            <field name="code">CM_INC</field>
+            <field name="report_id" ref="casamueble_cash_flow_report"/>
+            <field name="sequence">10</field>
+            <field name="hierarchy_level">0</field>
+            <field name="foldable" eval="True"/>
+            <field name="groupby"></field>
+            <field name="hide_if_zero" eval="False"/>
+        </record>
+
+        <record id="expr_cm_ingresos_balance" model="account.report.expression">
+            <field name="report_line_id" ref="line_cm_ingresos"/>
+            <field name="label">balance</field>
+            <field name="engine">aggregation</field>
+            <field name="formula">CM_INC_NEW.balance + CM_INC_ABO.balance</field>
+            <field name="subformula"></field>
+        </record>
+
+        <!-- SUB-LÍNEA 1.1 — VENTAS NUEVAS -->
+        <record id="line_cm_ingresos_new" model="account.report.line">
+            <field name="name">Ventas Nuevas</field>
+            <field name="code">CM_INC_NEW</field>
+            <field name="parent_id" ref="line_cm_ingresos"/>
+            <field name="report_id" ref="casamueble_cash_flow_report"/>
+            <field name="sequence">11</field>
+            <field name="hierarchy_level">1</field>
+            <field name="foldable" eval="True"/>
+            <field name="groupby">payment_id</field>
+        </record>
+
+        <record id="expr_cm_ingresos_new_balance" model="account.report.expression">
+            <field name="report_line_id" ref="line_cm_ingresos_new"/>
+            <field name="label">balance</field>
+            <field name="engine">domain</field>
+            <field name="formula">[('payment_id.payment_type', '=', 'inbound'), ('account_id.account_type', 'in', ('asset_cash', 'asset_current')), ('is_cm_new_sale', '=', True)]</field>
+            <field name="subformula">sum</field>
+            <field name="date_scope">normal</field>
+        </record>
+
+        <!-- SUB-LÍNEA 1.2 — ABONOS -->
+        <record id="line_cm_ingresos_abonos" model="account.report.line">
+            <field name="name">Abonos</field>
+            <field name="code">CM_INC_ABO</field>
+            <field name="parent_id" ref="line_cm_ingresos"/>
+            <field name="report_id" ref="casamueble_cash_flow_report"/>
+            <field name="sequence">12</field>
+            <field name="hierarchy_level">1</field>
+            <field name="foldable" eval="True"/>
+            <field name="groupby">payment_id</field>
+        </record>
+
+        <record id="expr_cm_ingresos_abonos_balance" model="account.report.expression">
+            <field name="report_line_id" ref="line_cm_ingresos_abonos"/>
+            <field name="label">balance</field>
+            <field name="engine">domain</field>
+            <field name="formula">[('payment_id.payment_type', '=', 'inbound'), ('account_id.account_type', 'in', ('asset_cash', 'asset_current')), ('is_cm_new_sale', '!=', True)]</field>
+            <field name="subformula">sum</field>
+            <field name="date_scope">normal</field>
+        </record>
+
+        <!-- ================================================================
+             LÍNEA 2 — EGRESOS TOTALES
+             Pagos de tipo "outbound" (pagamos a proveedores)
+             Se niega (-sum) para mostrar como valor positivo
+        ================================================================ -->
+
+        <record id="line_cm_egresos" model="account.report.line">
+            <field name="name">Egresos</field>
+            <field name="code">CM_EXP</field>
+            <field name="report_id" ref="casamueble_cash_flow_report"/>
+            <field name="sequence">20</field>
+            <field name="hierarchy_level">0</field>
+            <field name="foldable" eval="True"/>
+            <field name="groupby">payment_id</field>
+            <field name="hide_if_zero" eval="False"/>
+        </record>
+
+        <record id="expr_cm_egresos_balance" model="account.report.expression">
+            <field name="report_line_id" ref="line_cm_egresos"/>
+            <field name="label">balance</field>
+            <field name="engine">domain</field>
+            <field name="formula">[('payment_id.payment_type', '=', 'outbound'), ('account_id.account_type', 'in', ('asset_cash', 'asset_current'))]</field>
+            <field name="subformula">sum</field>
+            <field name="date_scope">normal</field>
+        </record>
+
+        <!-- ================================================================
+             LÍNEA 3 — BALANCE NETO
+             Ingresos − Egresos
+        ================================================================ -->
+
+        <record id="line_cm_balance_neto" model="account.report.line">
+            <field name="name">Balance Neto</field>
+            <field name="code">CM_NET</field>
+            <field name="report_id" ref="casamueble_cash_flow_report"/>
+            <field name="sequence">30</field>
+            <field name="hierarchy_level">0</field>
+            <field name="hide_if_zero" eval="False"/>
+        </record>
+
+        <record id="expr_cm_balance_neto_balance" model="account.report.expression">
+            <field name="report_line_id" ref="line_cm_balance_neto"/>
+            <field name="label">balance</field>
+            <field name="engine">aggregation</field>
+            <field name="formula">CM_INC.balance + CM_EXP.balance</field>
+        </record>
+
+        <!-- ================================================================
+             SEPARADOR — SECCIÓN DIEZMO
+        ================================================================ -->
+
+        <record id="line_cm_sep_diezmo" model="account.report.line">
+            <field name="name">─────────────────────────────</field>
+            <field name="report_id" ref="casamueble_cash_flow_report"/>
+            <field name="sequence">35</field>
+            <field name="hierarchy_level">0</field>
+            <field name="hide_if_zero" eval="False"/>
+        </record>
+
+        <!-- ================================================================
+             LÍNEA 4 — DIEZMO (10% de los Ingresos)
+        ================================================================ -->
+
+        <record id="line_cm_diezmo" model="account.report.line">
+            <field name="name">Diezmo</field>
+            <field name="code">CM_TITHE</field>
+            <field name="report_id" ref="casamueble_cash_flow_report"/>
+            <field name="sequence">40</field>
+            <field name="hierarchy_level">0</field>
+            <field name="hide_if_zero" eval="False"/>
+        </record>
+
+        <record id="expr_cm_diezmo_balance" model="account.report.expression">
+            <field name="report_line_id" ref="line_cm_diezmo"/>
+            <field name="label">balance</field>
+            <field name="engine">aggregation</field>
+            <field name="formula">CM_INC.balance * 0.1</field>
+        </record>
+
+        <!-- ================================================================
+             LÍNEA 5 — BALANCE DESPUÉS DEL DIEZMO
+             Balance Neto − Diezmo
+        ================================================================ -->
+
+        <record id="line_cm_balance_post_diezmo" model="account.report.line">
+            <field name="name">Balance después del Diezmo</field>
+            <field name="report_id" ref="casamueble_cash_flow_report"/>
+            <field name="sequence">50</field>
+            <field name="hierarchy_level">0</field>
+            <field name="hide_if_zero" eval="False"/>
+        </record>
+
+        <record id="expr_cm_balance_post_diezmo_balance" model="account.report.expression">
+            <field name="report_line_id" ref="line_cm_balance_post_diezmo"/>
+            <field name="label">balance</field>
+            <field name="engine">aggregation</field>
+            <field name="formula">CM_NET.balance - CM_TITHE.balance</field>
+        </record>
+
+        <!-- ================================================================
+             ACCIÓN Y MENÚ
+             Aparece en: Contabilidad → Informes → Ingresos y Egresos
+        ================================================================ -->
+
+        <record id="action_cm_cash_flow_report" model="ir.actions.client">
+            <field name="name">Ingresos y Egresos</field>
+            <field name="tag">account_report</field>
+            <field name="context" eval="{'report_id': ref('casamueble_reports.casamueble_cash_flow_report')}"/>
+        </record>
+
+        <menuitem
+            id="menu_cm_cash_flow_report"
+            name="Ingresos y Egresos"
+            parent="account.menu_finance_reports"
+            action="action_cm_cash_flow_report"
+            sequence="100"
+        />
+
+    </data>
+</odoo>
